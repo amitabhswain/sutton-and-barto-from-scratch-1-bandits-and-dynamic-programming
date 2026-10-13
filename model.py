@@ -140,8 +140,13 @@ def apply_random_walk_drift(true_values, drift_std, rng):
     noise = rng.normal(loc=0.0, scale=drift_std, size=true_values.shape)
     return true_values + noise
 
-# Step 9 - constant_step_size_update (not yet solved)
-# TODO: implement
+# Step 9 - constant_step_size_update
+import numpy as np
+
+def constant_step_size_update(q_values, action, reward, alpha):
+    q_new = np.array(q_values, dtype=float)
+    q_new[action] += alpha * (reward - q_new[action])
+    return q_new
 
 # Step 10 - optimistic_initialization (not yet solved)
 # TODO: implement
