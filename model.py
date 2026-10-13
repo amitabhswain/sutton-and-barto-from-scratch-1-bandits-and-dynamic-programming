@@ -270,8 +270,30 @@ def bandit_parameter_study(n_runs, n_steps, seed, settings):
 
     return results
 
-# Step 14 - build_gridworld_mdp (not yet solved)
-# TODO: implement
+# Step 14 - build_gridworld_mdp
+def build_gridworld_mdp():
+    n_states = 16
+    n_actions = 4
+    size = 4
+    terminals = {0, 15}
+    # action -> (row change, column change): north, east, south, west
+    deltas = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+
+    P = []
+    for s in range(n_states):
+        P.append([])
+        for a in range(n_actions):
+            if s in terminals:
+                P[s].append([(1.0, s, 0.0)])
+            else:
+                row, col = divmod(s, size)
+                dr, dc = deltas[a]
+                new_row = min(max(row + dr, 0), size - 1)
+                new_col = min(max(col + dc, 0), size - 1)
+                next_s = new_row * size + new_col
+                P[s].append([(1.0, next_s, -1.0)])
+
+    return {'n_states': n_states, 'n_actions': n_actions, 'P': P}
 
 # Step 15 - iterative_policy_evaluation (not yet solved)
 # TODO: implement
