@@ -194,8 +194,81 @@ def gradient_bandit_update(preferences, action, reward, average_reward, alpha):
 
     return H
 
-# Step 13 - bandit_parameter_study (not yet solved)
-# TODO: implement
+# Step 13 - bandit_parameter_study
+import numpy as np
+
+def bandit_parameter_study(n_runs, n_steps, seed, settings):
+    k = 10
+    results = {}
+
+    for setting in settings:
+        method = setting['method']
+        param = setting['param']
+        nonstationary = setting.get('nonstationary', False)
+
+        label = f"{method}({param})"
+        if nonstationary:
+            label += ",ns"
+
+        final_rewards = np.zeros(n_runs)
+
+        for run in range(n_runs):
+            if nonstationary:
+                true_values = np.zeros(k)
+            else:
+                true_values = create_bandit_testbed(k, seed + run)
+            rng = np.random.default_rng(seed + run)
+
+            q = np.zeros(k)
+            counts = np.zeros(k, dtype=int)
+            prefs = np.zeros(k)
+            average_reward = 0.0
+            if method == 'optimistic':
+                q = optimistic_initialization(k, param)
+
+            reward = 0.0
+            for t in range(1, n_steps + 1):
+                # 1. select an action
+                if method == 'epsilon_greedy':
+                    action = epsilon_greedy_action(q, param, rng)
+                elif method == 'constant_step':
+                    action = epsilon_greedy_action(q, 0.1, rng)
+                elif method == 'optimistic':
+                    action = epsilon_greedy_action(q, 0.0, rng)
+                elif method == 'ucb':
+                    action = ucb_action_select(q, counts, t, param)
+                elif method == 'gradient':
+                    e = np.exp(prefs - np.max(prefs))
+                    pi = e / e.sum()
+                    action = int(rng.choice(k, p=pi))
+                else:
+                    raise ValueError(f"Unknown method: {method}")
+
+                # 2. pull the arm
+                reward = pull_arm(true_values, action, rng)
+
+                # 3. update the agent
+                if method in ('epsilon_greedy', 'ucb'):
+                    q, counts = sample_average_update(q, counts, action, reward)
+                elif method == 'constant_step':
+                    q = constant_step_size_update(q, action, reward, param)
+                elif method == 'optimistic':
+                    q = constant_step_size_update(q, action, reward, 0.1)
+                else:  # gradient
+                    average_reward += (reward - average_reward) / t
+                    prefs = gradient_bandit_update(
+                        prefs, action, reward, average_reward, param
+                    )
+
+                # 4. the world drifts
+                if nonstationary:
+                    true_values = apply_random_walk_drift(true_values, 0.01, rng)
+
+            final_rewards[run] = reward
+
+        results[label] = float(final_rewards.mean())
+
+    return results
 
 # Step 14 - build_gridworld_mdp (not yet solved)
 # TODO: implement
