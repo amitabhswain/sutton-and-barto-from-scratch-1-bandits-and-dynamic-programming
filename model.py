@@ -154,8 +154,29 @@ import numpy as np
 def optimistic_initialization(k, initial_value):
     return np.full(k, initial_value, dtype=float)
 
-# Step 11 - ucb_action_select (not yet solved)
-# TODO: implement
+# Step 11 - ucb_action_select
+import numpy as np
+
+def ucb_action_select(q_values, action_counts, timestep, c):
+    """Select an action by upper-confidence-bound scores.
+
+    Args:
+        q_values (np.ndarray): Action-value estimates, shape (k,).
+        action_counts (np.ndarray): Visit counts per action, shape (k,).
+        timestep (int): Current time step t (>= 1).
+        c (float): Exploration constant.
+
+    Returns:
+        int: Index of the selected action.
+    """
+    q = np.asarray(q_values, dtype=float)
+    n = np.asarray(action_counts)
+
+    scores = np.full(len(q), np.inf)
+    visited = n > 0
+    scores[visited] = q[visited] + c * np.sqrt(np.log(timestep) / n[visited])
+
+    return int(np.argmax(scores))
 
 # Step 12 - gradient_bandit_update (not yet solved)
 # TODO: implement
