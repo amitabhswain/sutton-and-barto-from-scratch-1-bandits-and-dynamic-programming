@@ -148,8 +148,11 @@ def constant_step_size_update(q_values, action, reward, alpha):
     q_new[action] += alpha * (reward - q_new[action])
     return q_new
 
-# Step 10 - optimistic_initialization (not yet solved)
-# TODO: implement
+# Step 10 - optimistic_initialization
+import numpy as np
+
+def optimistic_initialization(k, initial_value):
+    return np.full(k, initial_value, dtype=float)
 
 # Step 11 - ucb_action_select (not yet solved)
 # TODO: implement
