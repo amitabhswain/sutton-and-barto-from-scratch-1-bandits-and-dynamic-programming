@@ -295,8 +295,37 @@ def build_gridworld_mdp():
 
     return {'n_states': n_states, 'n_actions': n_actions, 'P': P}
 
-# Step 15 - iterative_policy_evaluation (not yet solved)
-# TODO: implement
+# Step 15 - iterative_policy_evaluation
+import numpy as np
+
+def iterative_policy_evaluation(policy, mdp, gamma, theta):
+    n_states = mdp['n_states']
+    n_actions = mdp['n_actions']
+    P = mdp['P']
+
+    policy = np.asarray(policy)
+    if policy.ndim == 1:
+        pi = np.zeros((n_states, n_actions))
+        pi[np.arange(n_states), policy.astype(int)] = 1.0
+    else:
+        pi = policy
+
+    V = np.zeros(n_states)
+
+    while True:
+        delta = 0.0
+        for s in range(n_states):
+            v = V[s]
+            new_v = 0.0
+            for a in range(n_actions):
+                for prob, next_s, reward in P[s][a]:
+                    new_v += pi[s, a] * prob * (reward + gamma * V[next_s])
+            V[s] = new_v
+            delta = max(delta, abs(v - new_v))
+        if delta < theta:
+            break
+
+    return V
 
 # Step 16 - greedy_policy_improvement (not yet solved)
 # TODO: implement
