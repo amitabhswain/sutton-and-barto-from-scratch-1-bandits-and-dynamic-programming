@@ -346,8 +346,21 @@ def greedy_policy_improvement(state_values, mdp, gamma):
 
     return policy
 
-# Step 17 - policy_iteration (not yet solved)
-# TODO: implement
+# Step 17 - policy_iteration
+import numpy as np
+
+def policy_iteration(mdp, gamma, theta):
+    n_states = mdp['n_states']
+    policy = np.zeros(n_states, dtype=int)
+
+    while True:
+        state_values = iterative_policy_evaluation(policy, mdp, gamma, theta)
+        new_policy = greedy_policy_improvement(state_values, mdp, gamma)
+
+        if np.array_equal(new_policy, policy):
+            return state_values, new_policy
+
+        policy = new_policy
 
 # Step 18 - value_iteration (not yet solved)
 # TODO: implement
