@@ -472,6 +472,44 @@ def gambler_value_iteration(goal, head_prob, theta, gamma=1.0):
     V[goal] = 0.0
     return V
 
-# Step 21 - extract_optimal_stakes (not yet solved)
-# TODO: implement
+# Step 21 - extract_optimal_stakes
+import numpy as np
+
+def extract_optimal_stakes(state_values, goal, head_prob, gamma=1.0):
+    """Extract the optimal stake for every capital level from V.
+
+    Parameters
+    ----------
+    state_values : np.ndarray, shape (goal + 1,)
+        Converged state values for capitals 0 .. goal.
+    goal : int
+        Capital target.
+    head_prob : float
+        Probability the coin lands heads.
+    gamma : float, optional
+        Discount factor (default 1.0).
+
+    Returns
+    -------
+    stakes : np.ndarray, shape (goal + 1,), dtype int
+        stakes[s] is an optimal stake for capital s (0 at terminals).
+        Ties are broken by choosing the smallest stake.
+    """
+    mdp = build_gambler_mdp(goal, head_prob)
+    P = mdp['P']
+
+    stakes = np.zeros(goal + 1, dtype=int)
+
+    for s in range(1, goal):
+        best_q = -np.inf
+        best_stake = 0
+        for a in range(len(P[s])):
+            q = sum(prob * (reward + gamma * state_values[next_s])
+                    for prob, next_s, reward in P[s][a])
+            if q > best_q:
+                best_q = q
+                best_stake = a + 1
+        stakes[s] = best_stake
+
+    return stakes
 
