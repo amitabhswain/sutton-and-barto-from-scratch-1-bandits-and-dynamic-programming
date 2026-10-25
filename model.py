@@ -427,8 +427,50 @@ def build_gambler_mdp(goal, head_prob):
 
     return {'n_states': n_states, 'n_actions': n_actions, 'P': P}
 
-# Step 20 - gambler_value_iteration (not yet solved)
-# TODO: implement
+# Step 20 - gambler_value_iteration
+import numpy as np
+
+def gambler_value_iteration(goal, head_prob, theta, gamma=1.0):
+    """Solve the gambler's problem with value iteration.
+
+    Parameters
+    ----------
+    goal : int
+        Capital target (terminal winning state).
+    head_prob : float
+        Probability the coin lands heads.
+    theta : float
+        Stop when the largest value change in a sweep is below this.
+    gamma : float, optional
+        Discount factor (default 1.0).
+
+    Returns
+    -------
+    state_values : np.ndarray, shape (goal+1,)
+        Optimal values; state_values[0] and state_values[goal] are 0.
+    """
+    mdp = build_gambler_mdp(goal, head_prob)
+    P = mdp['P']
+
+    V = np.zeros(goal + 1)
+
+    while True:
+        delta = 0.0
+        for s in range(1, goal):
+            v = V[s]
+            best = max(
+                sum(prob * (reward + gamma * V[next_s])
+                    for prob, next_s, reward in P[s][a])
+                for a in range(len(P[s]))
+            )
+            V[s] = best
+            delta = max(delta, abs(v - best))
+        if delta < theta:
+            break
+
+    V[0] = 0.0
+    V[goal] = 0.0
+    return V
 
 # Step 21 - extract_optimal_stakes (not yet solved)
 # TODO: implement
